@@ -35,6 +35,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.5/pagination.min.js"
         integrity="sha512-1zzZ0ynR2KXnFskJ1C2s+7TIEewmkB2y+5o/+ahF7mwNj9n3PnzARpqalvtjSbUETwx6yuxP5AJXZCpnjEJkQw=="
         crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function () {
+            $("button").click(function () {
+                const username = $("#InputEmail").val();
+                const password = $("#InputPassword").val();
+                
+                // connect to /login service 
+                $.ajax({
+                    method: "POST",
+                    url: "/login",
+                    data: { "username": username, "password": password },
+                    success: function (data, state) {
+                        alert("Success");
+                        window.location.replace(data)
+                    },
+                    error: function (xhr, state, error) {
+                        alert("Error, please try again");
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -49,23 +71,20 @@
                 <h3 class="text-center">
                     Welcome new customer!
                 </h3>
-
-
-
                 <form role="form">
                     <div class="form-group">
-
-                        <label for="exampleInputEmail1">
+                        <!--input Email-->
+                        <label>
                             Email address
                         </label>
-                        <input type="email" class="form-control" id="exampleInputEmail1" />
+                        <input type="email" class="form-control" id="InputEmail" />
                     </div>
                     <div class="form-group">
-
-                        <label for="exampleInputPassword1">
+                        <!--input Password-->
+                        <label>
                             Password
                         </label>
-                        <input type="password" class="form-control" id="exampleInputPassword1" />
+                        <input type="password" class="form-control" id="InputPassword" />
                     </div>
                     <div class="checkbox">
                         <label>
@@ -74,7 +93,7 @@
                     </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary btn-block my-3"> Login </button>
-                        <a href="url">Don't have account yet?</a>
+                        <a href="./register_user.html">Don't have account yet?</a>
                     </div>
 
 
@@ -83,7 +102,7 @@
             </div>
         </div>
     </div>
-    
+
 </body>
 
 </html>
