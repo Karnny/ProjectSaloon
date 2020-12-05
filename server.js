@@ -1,16 +1,21 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const fs = require('fs');
+const multer = require("multer");
+
 
 // ----- Mysql ------
 const mysql = require('mysql');
-const config = require('./config/dbConfig.js');
-database = mysql.createConnection(config);
+const dbConfig = require('./config/dbConfig.js');
+const e = require('express');
+const database = mysql.createConnection(dbConfig);
 
 // ---- Middleware -----
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 // Page route
 app.get("/", (req, res) => {
@@ -33,10 +38,13 @@ app.get("/user", (req, res) => {
     res.sendFile(path.join(__dirname, "/views/user.html"));
 });
 
-app.get("/test", (req, res) => {
-    res.sendFile(path.join(__dirname, "/views/test"));
+app.get("/edit_shop", (req, res) => {
+    res.sendFile(path.join(__dirname, "/views/editshop.html"));
 });
 
+app.get("/appointbarber", (req, res)=> {
+    res.sendFile(path.join(__dirname, "/views/appointment.html"));
+})
 
 //  Other route
 
@@ -58,11 +66,55 @@ app.post("/api/login", (req, res) => {
                 } else {
                     res.send("/user");
                 }
-                
+
             }
         }
     });
 });
+
+// -------- save edit shop ------
+
+app.post('/api/edit_shop', (req, res) => {
+    
+    
+    let shop = JSON.parse(req.headers.shop);
+    console.log(shop);
+    let imageName = Date.now() + "_" + shop.user_id + '.jpg';
+    const options = multer.diskStorage({
+        destination: function(req, file, cb){
+            cb(null, "public/images/");
+        },
+        filename: function(req, file, cb){
+            cb(null, imageName);
+        }
+    });
+    
+    const upload = multer({storage: options}).single("fileUpload");
+
+    upload(req, res, function (err) {
+        if (err) {
+            console.log(err);
+            res.status(500).send("Upload error");
+        } else {
+
+            const sql = "INSERT INTO stores (store_name, store_details, store_owner, store_location_lat, store_location_long, store_banner_image) VALUES (?,?,?,?,?,?)";
+            database.query(sql, [shop.shop_name, shop.shop_details, shop.user_id, shop.shop_lat, shop.shop_long, imageName], function(err, result) {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send("DB error")
+                } else {
+                    res.send("Upload done");
+                }
+            });
+
+            
+        }
+    });
+});
+
+async function getShopDetails() {
+
+}
 
 
 const PORT = 3000;
