@@ -40,7 +40,21 @@
         src="https://rawgit.com/Logicify/jquery-locationpicker-plugin/master/dist/locationpicker.jquery.js"></script>
     <script>
         $(document).ready(function () {
+          
+            
+            $('#submitPic')
+            .submit(function (e) {
+                $.ajax({
+            type: "file",
+            url: "/edit/shop",
+            data: "data",
+        }).done(
+            
+        ).fail(
 
+        );
+            });
+        
 
 
 
