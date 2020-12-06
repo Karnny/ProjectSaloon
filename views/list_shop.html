@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!--Sweet alert-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.6.1/sweetalert2.min.css">
+    <!--JQ + Bootstrap CDN-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+        integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.5.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+
+    <style>
+        /* Fix background-color in web */
+        body {
+            background: linear-gradient(to right, #c04848, #480048);
+            min-height: 100vh
+        }
+
+        /* Fix text-color in card body */
+        .text-gray {
+            color: #aaa
+        }
+
+        /* Fix img scale in card body */
+        img {
+            height: 30%;
+            width: 30%
+        }
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            $.ajax({
+                type: 'GET',
+                url: '/api/get_shop_list',
+                success: function (response) {
+                    setShopList(response);
+                },
+                error: function (xhr) {
+                    Swal.fire(xhr.responseText);
+                }
+            })
+
+            function setShopList(list) {//store_id, store_name, store_details, store_banner_image AS 'store_image_url'
+                let display = $("#shopList");
+                let template = ''; 
+                for (i in list) {
+                    template += `<a href="javascript:void(0)" class="shopClass" shop_id="${list[i].store_id}">
+                        <li class="list-group-item">
+                            <!-- Custom content-->
+                            <div class="media align-items-lg-center flex-column flex-lg-row p-3">
+                                <div class="media-body order-2 order-lg-1">
+                                    <h5 class="mt-0 font-weight-bold mb-2">${list[i].store_name}</h5>
+                                    <p class="font-italic text-muted mb-0 small">${list[i].store_details}</p>
+                                    <div class="d-flex align-items-center justify-content-between mt-1">
+                                        <ul class="list-inline small">
+                                            <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i>
+                                            </li>
+                                            <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i>
+                                            </li>
+                                            <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i>
+                                            </li>
+                                            <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i>
+                                            </li>
+                                            <li class="list-inline-item m-0"><i class="fa fa-star-o text-gray"></i></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <img src="images/${list[i].store_image_url}" alt="Generic placeholder image" width="500"
+                                    class="ml-lg-5 order-1 order-lg-2">
+                            </div> <!-- End -->
+                        </li> <!-- End -->
+                    </a>`;
+                }
+
+                display.html(template);
+            }
+
+
+            $('.shopClass').click(function (e) {
+                e.preventDefault();
+                $('#modalTitle').html($(this).attr('shop_id'));
+                $('#modalShopDetails').modal('toggle');
+
+            });
+        });
+
+
+
+    </script>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow">
+        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId"
+            aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="collapsibleNavId">
+            <ul class="navbar-nav mr-auto px-3 mt-2 mt-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Start Booking</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/customer_appointment">My Booking</a>
+                </li>
+
+
+            </ul>
+
+        </div>
+
+    </nav>
+    <!--Nav bar end here-->
+
+    <!--list shop start here-->
+    <div class="container py-2">
+        <div class="row text-center text-white mb-5">
+            <div class="col-lg-7 mx-auto">
+                <h1 class="display-4">Shop List</h1>
+            </div>
+        </div>
+        <div class="row my-3">
+            <div class="col-lg-8 mb-3 mx-auto">
+                <div class="input-group">
+                    <input class="form-control py-2 rounded-pill mr-1 pr-5" type="search" value="" placeholder="Search"
+                        id="example-search-input">
+                    <span class="input-group-append">
+                        <button class="btn rounded-pill border-0 ml-n5" type="button">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- List group-->
+                <ul class="list-group shadow" id="shopList">
+                    <!-- list group item-->
+                    <a href="javascript:void(0)" class="shopClass" shop_id="6">
+                        <li class="list-group-item">
+                            <!-- Custom content-->
+                            <div class="media align-items-lg-center flex-column flex-lg-row p-3">
+                                <div class="media-body order-2 order-lg-1">
+                                    <h5 class="mt-0 font-weight-bold mb-2" id="id">Shop 1</h5>
+                                    <p class="font-italic text-muted mb-0 small">Lorem ipsum dolor sit amet</p>
+                                    <div class="d-flex align-items-center justify-content-between mt-1">
+                                        <ul class="list-inline small">
+                                            <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i>
+                                            </li>
+                                            <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i>
+                                            </li>
+                                            <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i>
+                                            </li>
+                                            <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i>
+                                            </li>
+                                            <li class="list-inline-item m-0"><i class="fa fa-star-o text-gray"></i></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <img src="https://i.imgur.com/KFojDGa.jpg" alt="Generic placeholder image" width="500"
+                                    class="ml-lg-5 order-1 order-lg-2">
+                            </div> <!-- End -->
+                        </li> <!-- End -->
+                    </a>
+                    <!-- list group item-->
+
+                </ul> <!-- End -->
+            </div>
+        </div> <!-- end of row -->
+
+    </div> <!-- end of Container -->
+
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalShopDetails" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Body
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

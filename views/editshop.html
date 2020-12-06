@@ -74,14 +74,13 @@
                 }
             });
         });
+        
         //img pre-upload
-
         function previewFile() {
             const preview = document.querySelector('#imgUpload');
             const file = document.querySelector('input[type=file]').files[0];
             const reader = new FileReader();
             // bannerImageFileName = event.target.files[0].name;
-
             reader.addEventListener("load", function () {
                 // convert image file to base64 string
                 //preview.src = reader.result;
@@ -98,41 +97,58 @@
         }
 
         function sendToServer(event) {
-            const data = new FormData($('#bannerForm')[0]);
 
-            let shopDetails = {
-                user_id: (function () {
-                    if (sessionStorage.saloon_user_id != undefined) {
-                        return sessionStorage.saloon_user_id;
-                    } else {
-                        // Swal.fire("Please login first!");
-                        // window.location.replace('/login');
-                        return 1;
+            let details = [
+                $('#us3-lat').val(),
+                $('#us3-lon').val(),
+                $('#shopName').val(),
+                $('#shopDetails').val()
+            ];
+
+
+            if (details.some((el) => el == "")) {
+                Swal.fire('Please fill in your shop details!');
+            } else {
+                sendDetails();
+            }
+
+            function sendDetails() {
+                const data = new FormData($('#bannerForm')[0]);
+
+                let shopDetails = {
+                    user_id: (function () {
+                        if (sessionStorage.user_id != undefined) {
+                            return sessionStorage.user_id;
+                        } else {
+                            Swal.fire("Please register first!");
+                            window.location.replace('/register_barber');
+                            
+                        }
+                    })(),
+
+                    shop_lat: $('#us3-lat').val(),
+                    shop_long: $('#us3-lon').val(),
+                    shop_name: $('#shopName').val(),
+                    shop_details: $('#shopDetails').val(),
+                    shop_services: services
+
+
+                };
+
+                console.log(shopDetails);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/edit_shop",
+                    data: data,
+                    headers: { shop: JSON.stringify(shopDetails) },
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        Swal.fire("Upload success!");
                     }
-                })(),
-
-                shop_lat: $('#us3-lat').val(),
-                shop_long: $('#us3-lon').val(),
-                shop_name: $('#shopName').val(),
-                shop_details: $('#shopDetails').val(),
-                shop_services: services
-
-
-            };
-
-            console.log(shopDetails);
-
-            $.ajax({
-                type: "POST",
-                url: "/api/edit_shop",
-                data: data,
-                headers: {shop: JSON.stringify(shopDetails)},
-                contentType: false,
-                processData: false,
-                success: function (response) {
-                    alert("Image upload success!")
-                }
-            });
+                });
+            }
         }
 
         //service list store here 
@@ -184,7 +200,7 @@
         <div class="row">
             <div class="col-md-12">
                 <!--navbar -->
-                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 
                     <button class="navbar-toggler" type="button" data-toggle="collapse"
                         data-target="#bs-example-navbar-collapse-1">
@@ -201,9 +217,9 @@
                         </ul>
 
                     </div>
-                </nav>
+                </nav> -->
                 <!--shop's background image will go here -->
-                <div class="jumbotron" id="jumboIMG" alt="Image preview. . .">
+                <div class="jumbotron my-4" id="jumboIMG" alt="Image preview. . .">
                     <!-- <img src="" height="200" id="imgUpload" alt="Image preview...">
                     <h2>
                         Image
@@ -219,7 +235,7 @@
                     <p><input type="file" id="btnUploadimg" name="fileUpload" onchange="previewFile()"></input></p>
                 </form>
 
-                <p><input type="button" id="" value="TestSend" onclick="sendToServer()"></p>
+
 
 
             </div>
@@ -251,11 +267,11 @@
 
             <!-- Edit details -->
             <div class="form-group">
-                <label class="col-md-4 control-label h3" for="textarea">Edit shop details</label>
+                <label class="col-md-8 control-label h3" for="textarea">Edit shop details</label>
                 <div class="col-md-8">
                     <input type="text" class="form-control my-2" name="" id="shopName" placeholder="Your shop name">
-                    <textarea class="form-control" id="shopDetails" name="textarea"
-                        style="height: 200px;" placeholder="Your shop details"></textarea>
+                    <textarea class="form-control" id="shopDetails" name="textarea" style="height: 200px;"
+                        placeholder="Your shop details"></textarea>
                 </div>
             </div>
 
@@ -265,7 +281,10 @@
     </div>
 
     <div class="container">
-        <h3>Service</h3>
+        <h3>Service <span class="float-right"><button type="button" class="btn btn-primary btn-md mb-4"
+                    data-toggle="modal" data-target="#modalAddService">
+                    Add Service
+                </button></span></h3>
         <table id='serviceList' class="table table-striped">
             <tr>
                 <th>Service Name</th>
@@ -275,9 +294,9 @@
 
         </table>
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary btn-lg mb-4" data-toggle="modal" data-target="#modalAddService">
-            Add Service
-        </button>
+
+        <p><input type="button" class="btn btn-success btn-lg float-right mb-4" id="" value="Save"
+                onclick="sendToServer()"></p>
     </div>
 
     <!-- Modal -->

@@ -38,28 +38,45 @@
         crossorigin="anonymous"></script>
     <script>
         $(document).ready(function () {
-            $("button").click(function () {
-                const Fullname = $("#registerFullname").val();
-                const Email = $("#registerEmail").val();
-                const Phone = $("#registerPhone").val();
-                const Age = $("#registerAge").val();
-                const Password = $("#registerPassword").val();
-                const RepeatPassword = $("#repeatPassword").val();
-                
-                //connect to /register_user service
-                $.ajax({
-                    type: "POST",
-                    url: "/register_user",
-                    data: "data",
-                    success: function (response) {
-                        //jump to index.html
-                        window.location.replace(data)
-                    },
-                    error: function(xhr){
-                        //show error message
-                        alert("please fill your information!!!")
-                    }
-                });
+
+
+            $("#btnCreateAccount").click(function () {
+                const fullName = $("#registerFullname").val();
+                const email = $("#registerEmail").val();
+                const username = $("#registerUsername").val();
+                const phone = $("#registerPhone").val();
+                const password = $("#registerPassword").val();
+                const repeatPassword = $("#repeatPassword").val();
+
+                if ([fullName, email, username, phone, password, repeatPassword].some((el) => el == "")) {
+                    Swal.fire("Please fill in your info!");
+                } else if (password != repeatPassword) {
+                    Swal.fire("Password is not match!");
+                } else {
+
+                    //connect to /register_barber service
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/register",
+                        data: {
+                            registerType: 'customer',
+                            fullName: fullName,
+                            username: username,
+                            email: email,
+                            phone: phone,
+                            password: password
+                        },
+                        success: function (response) {
+                            sessionStorage.user_id = response.user_id;
+                            //jump to editshop.html
+                            window.location.replace(response.forwardUrl)
+                        },
+                        error: function (xhr) {
+                            //show error message
+                            Swal.fire(xhr.responseText);
+                        }
+                    });
+                }
             });
         });
     </script>
@@ -72,43 +89,32 @@
                 <h4 class="card-title mt-3 text-center">Create Account</h4>
                 <p class="text-center">Get started with your free account</p>
                 <p>
-                    <a href="/register_barber.html" class="btn btn-primary btn-block"><i> Switch to barber</i></a>
+                    <a href="/register_barber" class="btn btn-primary btn-block"><i> Switch to barber</i></a>
 
                 </p>
                 <p class="divider-text">
                     <span class="bg-light">Fill your information</span>
                 </p>
                 <form>
-                    <!-- form-group// -->
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"> <i class="fa fa-user"></i> </span>
                         </div>
-                        <input class="form-control" placeholder="Full name" type="text" id="registerFullname">
+                        <input name="" class="form-control" placeholder="Full name" type="text" id="registerFullname">
+                    </div> <!-- form-group// -->
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                        </div>
+                        <input name="" class="form-control" placeholder="Username" type="text" id="registerUsername">
                     </div> <!-- form-group// -->
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
                         </div>
-                        <input class="form-control" placeholder="Email address" type="email" id="registerEmail">
+                        <input name="" class="form-control" placeholder="Email address" type="email" id="registerEmail">
                     </div> <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
-                        </div>
-                        <input class="form-control" placeholder="Phone number" type="text" id="registerPhone">
-                    </div> <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"> <i class="fa fa-check"></i> </span>
-                        </div>
-                        <select class="form-control" id="registerAge">
-                            <option selected=""> Select your age</option>
-                            <option>below 18</option>
-                            <option>19-25</option>
-                            <option>26+</option>
-                        </select>
-                    </div> <!-- form-group // -->
+                    <!-- form-group end.// -->
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
@@ -121,37 +127,26 @@
                         </div>
                         <input class="form-control" placeholder="Repeat password" type="password" id="repeatPassword">
                     </div> <!-- form-group// -->
-                    <div class="card card-cascade narrower">
-
-                        <!--Card image //do it later-->
-                        <div class="view view-cascade gradient-card-header blue-gradient">
-                            <h5 class="mb-0">Location</h5>
-                        </div>
-                        <!--/Card image-->
-
-                        <!--Card content-->
-                        <div class="card-body card-body-cascade text-center">
-
-                            <!--Google map-->
-                            <div id="map-container-google-8" class="z-depth-1-half map-container-5"
-                                style="height: 300px">
-                                <iframe
-                                    src="https://maps.google.com/maps?q=Barcelona&t=&z=13&ie=UTF8&iwloc=&output=embed"
-                                    frameborder="0" style="border:0" allowfullscreen></iframe>
-                            </div>
-
-                        </div>
-                        <!--/.Card content-->
-
-                    </div>
-                    <!--/.Card-->
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary btn-block"> Create Account </button>
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
+                            </div>
+                            <input name="" class="form-control" placeholder="Phone number" type="text"
+                                id="registerPhone">
+                        </div> <!-- form-group// -->
+                        <button type="button" id="btnCreateAccount" class="btn btn-primary btn-block"> Create Account
+                        </button>
                     </div> <!-- form-group// -->
                     <p class="text-center">Have an account? <a href="./login.html">Log In</a> </p>
                 </form>
             </article>
         </div> <!-- card.// -->
+
+    </div> <!-- form-group// -->
+
+
+
 
     </div>
     <!--container end.//-->
