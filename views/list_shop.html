@@ -8,6 +8,7 @@
     <!--Sweet alert-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.6.1/sweetalert2.min.css">
     <!--JQ + Bootstrap CDN-->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
@@ -17,6 +18,8 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.6.1/sweetalert2.min.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <style>
         /* Fix background-color in web */
@@ -38,8 +41,18 @@
     </style>
 
     <script>
-
+        var totalServicePrice;
+        var totalPrice;
+        var shop_info;
         $(document).ready(function () {
+            if (sessionStorage.user_id == undefined || sessionStorage.user_id == "undefined") {
+                Swal.fire("Please login first!").then(function () {
+                    window.location.replace("/login");
+                });
+            } else {
+
+            }
+
             $.ajax({
                 type: 'GET',
                 url: '/api/get_shop_list',
@@ -51,9 +64,10 @@
                 }
             })
 
-            function setShopList(list) {//store_id, store_name, store_details, store_banner_image AS 'store_image_url'
+            //create display shop list
+            function setShopList(list) {
                 let display = $("#shopList");
-                let template = ''; 
+                let template = '';
                 for (i in list) {
                     template += `<a href="javascript:void(0)" class="shopClass" shop_id="${list[i].store_id}">
                         <li class="list-group-item">
@@ -86,14 +100,99 @@
                 display.html(template);
             }
 
+            //Update modal  info by store name with on click function
+            $('#shopList').on('click', '.shopClass', function (e) {
 
-            $('.shopClass').click(function (e) {
                 e.preventDefault();
-                $('#modalTitle').html($(this).attr('shop_id'));
+
+                $.ajax({
+                    type: "GET",
+                    async: false,
+                    url: "/api/get_shop_details_by_id/" + $(this).attr('shop_id'),
+                    dataType: 'JSON',
+                    dataSrc: '',
+                    success: function (data) {
+                        shop_info = data;
+                    },
+                    error: function (xhr) {
+                        Swal.fire(xhr.responseText);
+                    }
+                });
+
+                //set store name
+                $('#modalTitle').html(shop_info[0].store_name + "'s store");
+                insertToShopModal(shop_info);
+
                 $('#modalShopDetails').modal('toggle');
 
             });
+
+            //function add price to modal
+            function insertToShopModal(shop_info) {
+                $('#totalPrice').html('0฿');
+                let modalServicesTemplate = ``;
+                for (i in shop_info) {
+                    modalServicesTemplate += `<p>
+                            <input type="checkbox" class="ml-5" name="services" service_id="${shop_info[i].service_id}" value="${shop_info[i].service_price}"> ${shop_info[i].service_name} (${shop_info[i].service_time} Minutes)
+                            <span class="float-right mr-5 font-weight-bold">${shop_info[i].service_price}฿</span>
+                        </p>`;
+                }
+
+                $("#modalServices").html(modalServicesTemplate);
+
+            }
+
+
+            $("#modalServices").on('click', 'input[name="services"]', function () {
+
+                try {
+                    totalServicePrice = $("input[name='services']:checked").map(function () {
+                        return $(this).val();
+                    }).get();
+
+                    totalPrice = totalServicePrice.reduce((a, b) => parseInt(a) + parseInt(b));
+                    $('#totalPrice').html(totalPrice + '฿');
+
+                } catch {
+                    $('#totalPrice').html('0฿');
+                }
+
+            });
+
+            $("#datePick").datepicker({
+                dateFormat: "yy-mm-dd"
+            });
         });
+
+        function saveBooking() {
+            const booking = {
+                booker_id: sessionStorage.user_id,
+                shop_id: shop_info[0].store_id,
+                booking_details: $('#bookingDetails').val(),
+                selected_services: $("input[name='services']:checked").map(function () {
+                    return $(this).attr('service_id');
+                }).get(),
+
+                card_number: $('#cardNumber').val(),
+                appointment_date: $("#datePick").val(),
+                booking_price: totalPrice
+
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/api/save_booking",
+                data: { booking },
+                success: function (response) {
+                    $('#modalShopDetails').modal('hide');
+                    Swal.fire("Booking success!");
+                },
+                error: function (xhr) {
+                    Swal.fire(xhr.responseText);
+                }
+            });
+
+        }
 
 
 
@@ -110,14 +209,14 @@
         <div class="collapse navbar-collapse" id="collapsibleNavId">
             <ul class="navbar-nav mr-auto px-3 mt-2 mt-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item active">
                     <a class="nav-link" href="#">Start Booking</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/customer_appointment">My Booking</a>
+                    <a class="nav-link" href="/customer_appointment">My Appointment</a>
                 </li>
 
 
@@ -135,7 +234,7 @@
                 <h1 class="display-4">Shop List</h1>
             </div>
         </div>
-        <div class="row my-3">
+        <div class="row my-3 no-gutters">
             <div class="col-lg-8 mb-3 mx-auto">
                 <div class="input-group">
                     <input class="form-control py-2 rounded-pill mr-1 pr-5" type="search" value="" placeholder="Search"
@@ -153,7 +252,7 @@
                 <!-- List group-->
                 <ul class="list-group shadow" id="shopList">
                     <!-- list group item-->
-                    <a href="javascript:void(0)" class="shopClass" shop_id="6">
+                    <a href="javascript:void(0)" class="shopClass" shop_id="">
                         <li class="list-group-item">
                             <!-- Custom content-->
                             <div class="media align-items-lg-center flex-column flex-lg-row p-3">
@@ -202,11 +301,39 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    Body
+                    <label class="h5 mb-4">Select Services</label>
+                    <div class="" id="modalServices">
+                        <p>
+                            <input type="checkbox" class="ml-5" name="services" value="Hair cut"> Hair cut
+                            <span class="float-right mr-5 font-weight-bold">80฿</span>
+                        </p>
+
+                    </div>
+                </div>
+
+                <div class="container">
+                    <hr>
+                    <label class="h5 mb-2">Payment</label>
+                    <div class="">
+                        <p>
+                            <i class="fa fa-id-card mr-2 h4"></i> <input type="text" class="form-control" name=""
+                                id="cardNumber" placeholder="Your credit card number">
+                        </p>
+                    </div>
+                </div>
+                <div class="container my-2">
+                    <p class="h5">Pick an appointment date</p>
+                    <input type="text" name="" data-provide="datepicker" class="form-control" id="datePick">
+                    <p class="h5">Booking details</p>
+                    <input type="text" name="" class="form-control" id="bookingDetails">
+                    <hr>
+                    <p class="h5">Total price</p>
+                    <p class="h5" id="totalPrice">0฿</p>
+                    <!--price will go though here-->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBooking()">Start booking</button>
                 </div>
             </div>
         </div>

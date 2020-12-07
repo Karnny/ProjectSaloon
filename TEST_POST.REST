@@ -8,5 +8,9 @@ content-type: application/json
 
 ###
 
-GET http://localhost:3000/api/get_shop_list HTTP/1.1
+GET http://localhost:3000/api/get_appointment_list/24 HTTP/1.1
+
+###
+
+GET http://localhost:3000/api/get_barber_appointment_by_id/14 HTTP/1.1
 

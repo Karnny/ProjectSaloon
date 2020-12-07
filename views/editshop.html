@@ -145,7 +145,12 @@
                     contentType: false,
                     processData: false,
                     success: function (response) {
-                        Swal.fire("Upload success!");
+                        Swal.fire("Upload success!").then(function() {
+                            window.location.href = "/login";
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire(xhr.responseText);
                     }
                 });
             }

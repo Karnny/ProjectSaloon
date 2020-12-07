@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const bcrypt = require('bcrypt');
-const fs = require('fs');
 const multer = require("multer");
 
 
@@ -126,23 +125,36 @@ app.post('/api/register', (req, res) => {
 app.post("/api/login", (req, res) => {
     let { username, password } = req.body;
     console.log(`New user logged: ${username}, ${password}`);
-    const sql = `SELECT username, role FROM user WHERE username=? AND password=?`;
-    database.query(sql, [username, password], function (err, result, fields) {
+    const sql = `SELECT user_id, username, password, role FROM users WHERE username=?`;
+    database.query(sql, [username], function (err, result, fields) {
 
         if (err) {
             console.log(err);
             res.status(500).send("Database Server Error.");
         } else {
-            if (result.length != 1) {
-                res.status(400).send("Wrong Username or Password.");
-            } else {
-                if (result[0].role == 1) {
-                    res.send("/admin");
+
+            bcrypt.compare(password, result[0].password, function (err, hashResult) {
+                if (err) {
+                    console.log("Compare has error");
+                    res.status(500).send("Compare hash error");
                 } else {
-                    res.send("/user");
+                    if (hashResult != true) {
+                        res.status(400).send("Wrong Username or Password.");
+                    } else {
+                        if (result[0].role == "barber" || result[0].role == "Barber") {
+                            console.log('Role: barber ID: ', result[0].user_id);
+                            res.json({ user_id: result[0].user_id, forwardUrl: "/appointbarber" });
+                        } else {
+                            res.json({ user_id: result[0].user_id, forwardUrl: "/customer_appointment" });
+                        }
+
+                    }
                 }
 
-            }
+            });
+
+
+
         }
     });
 });
@@ -249,8 +261,101 @@ app.get('/api/get_shop_list', (req, res) => {
 
 app.get('/api/get_shop_details_by_id/:shop_id', (req, res) => {
     let idShopToFind = req.params.shop_id;
-    console.log(idShopToFind);
+
+    const sql = `SELECT st.store_id, st.store_name, st.store_details, st.store_location_lat, st.store_location_long, sv.service_id, sv.service_name, sv.service_time, sv.service_price
+    FROM stores st JOIN services sv
+    ON sv.store_id = st.store_id
+    WHERE st.store_id = ?`;
+
+    database.query(sql, [idShopToFind], function (err, result) {
+        if (err) {
+            console.log(err);
+            res.status(500).send("DB server error");
+        } else {
+            res.json(result);
+        }
+    });
 });
+
+app.post('/api/save_booking', (req, res) => {
+    let booking = req.body.booking;
+    console.log(booking);
+
+    const sql = "INSERT INTO appointments (appointment_details, appointment_date, appointment_cardnumber, booking_totalprice, booker_id, store_id) VALUES (?,?,?,?,?,?)";
+    database.query(sql, [booking.booking_details, booking.appointment_date, booking.card_number, booking.booking_price, booking.booker_id, booking.shop_id], function (err, result) {
+        if (err) {
+            console.log(err);
+            res.status(500).send("DB server error");
+        } else {
+            if (result.affectedRows != 1) {
+                res.status(500).send("Booking error");
+            } else {
+                insertAppointmentServices(result.insertId, booking.selected_services);
+                res.send('Booking complete');
+            }
+        }
+    });
+
+    function insertAppointmentServices(app_id, services) {
+        console.log("Start INSERT AS: ", app_id, services);
+        const sql = "INSERT INTO appointment_has_services (appointment_id, service_id) VALUES (?,?)";
+        for (i in services) {
+            database.query(sql, [app_id, parseInt(services[i])], function (err, result) {
+                console.log("Inserting..");
+                if (err) {
+                    console.log(err);
+                    res.status(500).send("DB server error");
+                } else {
+                    if (result.affectedRows == 1) {
+                        return;
+                    } else {
+                        res.status(500).send('Booking error');
+                    }
+                }
+            });
+        }
+
+
+    }
+
+});
+
+app.get('/api/get_appointment_list_by_id/:user_id', (req, res) => {
+    const user_id = req.params.user_id;
+
+    const sql = `SELECT ap.appointment_id, ap.appointment_details, ap.appointment_date, ap.booking_totalprice, ap.store_id, st.store_name, st.store_location_lat, st.store_location_long
+    FROM appointments ap JOIN stores st ON ap.store_id = st.store_id
+    WHERE ap.booker_id = ?`;
+
+    database.query(sql, [user_id], function (err, result) {
+        if (err) {
+            console.log(err);
+            res.status(500).send("DB server error");
+        } else {
+            res.json(result);
+        }
+    });
+});
+
+app.get('/api/get_barber_appointment_by_id/:barber_id', (req, res) => {
+    const barber_id = req.params.barber_id;
+
+    const sql = `SELECT ap.appointment_id AS 'id', ap.appointment_date AS 'start', ap.appointment_date AS 'stop', u.fullname as 'title' 
+    FROM stores st JOIN appointments ap ON st.store_id = ap.store_id JOIN users u ON ap.booker_id = u.user_id
+    WHERE st.store_owner = ?`;
+
+    database.query(sql, [barber_id], function (err, result) { 
+        if (err) {
+            console.log(err);
+            res.status(500).send("DB server error");
+        } else {
+            res.json(result);
+        }
+     });
+
+
+});
+
 
 
 const PORT = 3000;

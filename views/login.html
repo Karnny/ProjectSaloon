@@ -44,14 +44,14 @@
                 // connect to /login service 
                 $.ajax({
                     method: "POST",
-                    url: "/login",
+                    url: "/api/login",
                     data: { "username": username, "password": password },
                     success: function (data, state) {
-                        alert("Success");
-                        window.location.replace(data)
+                        sessionStorage.user_id = data.user_id;
+                        window.location.replace(data.forwardUrl)
                     },
                     error: function (xhr, state, error) {
-                        alert("Error, please try again");
+                        Swal.fire(xhr.responseText);
                     }
                 });
             });
@@ -75,7 +75,7 @@
                     <div class="form-group">
                         <!--input Email-->
                         <label>
-                            Email address
+                            Username
                         </label>
                         <input type="email" class="form-control" id="InputEmail" />
                     </div>
@@ -93,7 +93,7 @@
                     </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary btn-block my-3"> Login </button>
-                        <a href="./register_user.html">Don't have account yet?</a>
+                        <a href="./register_user">Don't have account yet?</a>
                     </div>
 
 
