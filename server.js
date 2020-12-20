@@ -246,6 +246,9 @@ app.get('/api/check_user/:user_id', (req, res) => {
     console.log("User to check:", userToCheck, " has role ", "")
 });
 
+// ---- Not neccessary -----
+
+
 app.get('/api/get_shop_list', (req, res) => {
 
     const sql = "SELECT store_id, store_name, store_details, store_banner_image AS 'store_image_url' FROM stores";
@@ -301,7 +304,7 @@ app.post('/api/save_booking', (req, res) => {
         const sql = "INSERT INTO appointment_has_services (appointment_id, service_id) VALUES (?,?)";
         for (i in services) {
             database.query(sql, [app_id, parseInt(services[i])], function (err, result) {
-                console.log("Inserting..");
+                console.log("Inserting Appointment Service..");
                 if (err) {
                     console.log(err);
                     res.status(500).send("DB server error");
