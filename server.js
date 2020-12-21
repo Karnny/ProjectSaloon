@@ -133,25 +133,29 @@ app.post("/api/login", (req, res) => {
             res.status(500).send("Database Server Error.");
         } else {
 
-            bcrypt.compare(password, result[0].password, function (err, hashResult) {
-                if (err) {
-                    console.log("Compare has error");
-                    res.status(500).send("Compare hash error");
-                } else {
-                    if (hashResult != true) {
-                        res.status(400).send("Wrong Username or Password.");
+            if (result.length != 1) {
+                res.status(400).send("Username not found.");
+            } else {
+                bcrypt.compare(password, result[0].password, function (err, hashResult) {
+                    if (err) {
+                        console.log("Compare has error");
+                        res.status(500).send("Compare hash error");
                     } else {
-                        if (result[0].role == "barber" || result[0].role == "Barber") {
-                            console.log('Role: barber ID: ', result[0].user_id);
-                            res.json({ user_id: result[0].user_id, forwardUrl: "/appointbarber" });
+                        if (hashResult != true) {
+                            res.status(400).send("Wrong Username or Password.");
                         } else {
-                            res.json({ user_id: result[0].user_id, forwardUrl: "/customer_appointment" });
+                            if (result[0].role == "barber" || result[0].role == "Barber") {
+                                console.log('Role: barber ID: ', result[0].user_id);
+                                res.json({ user_id: result[0].user_id, forwardUrl: "/appointbarber" });
+                            } else {
+                                res.json({ user_id: result[0].user_id, forwardUrl: "/customer_appointment" });
+                            }
+
                         }
-
                     }
-                }
 
-            });
+                });
+            }
 
 
 
@@ -347,14 +351,14 @@ app.get('/api/get_barber_appointment_by_id/:barber_id', (req, res) => {
     FROM stores st JOIN appointments ap ON st.store_id = ap.store_id JOIN users u ON ap.booker_id = u.user_id
     WHERE st.store_owner = ?`;
 
-    database.query(sql, [barber_id], function (err, result) { 
+    database.query(sql, [barber_id], function (err, result) {
         if (err) {
             console.log(err);
             res.status(500).send("DB server error");
         } else {
             res.json(result);
         }
-     });
+    });
 
 
 });

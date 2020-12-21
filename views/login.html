@@ -57,7 +57,7 @@
     
     <script>
         $(document).ready(function () {
-            $("button").click(function () {
+            $("#btnLogin").click(function () {
                 const username = $("#InputEmail").val();
                 const password = $("#InputPassword").val();
                 
@@ -107,8 +107,8 @@
                         </label>
                     </div>
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-block my-3"> Login </button>
-                        <a href="./register_user">Don't have account yet?</a>
+                        <button type="button" class="btn btn-primary btn-block my-3" id="btnLogin"> Login </button>
+                        <a href="/register_user">Don't have account yet?</a>
                     </div>
                 </form>
             </article>
