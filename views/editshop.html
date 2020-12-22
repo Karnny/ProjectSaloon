@@ -47,6 +47,16 @@
             background-size: cover;
             border-bottom: 1px solid #ff6a00
         }
+        /* Fix background-color in web */
+        body {
+            background: linear-gradient(to right, #cffbff, #5b9dff);
+            min-height: 100vh
+        }
+
+        /* Fix text-color in card body */
+        .text-gray {
+            color: #aaa
+        }
     </style>
 
     <script>
@@ -87,7 +97,7 @@
 
                 $("#jumboIMG").css("background-image", `url(${reader.result})`);
 
-                // Send reader.result to backend
+                
 
             }, false);
 
@@ -279,12 +289,20 @@
                         placeholder="Your shop details"></textarea>
                 </div>
             </div>
+            <!--  Picture  -->
+            <!-- <div class="from-group">
+                <label class="col-md-8 control-label h3" for="textarea">Picture</label>
+                <div id="imgDetails"></div>
+                <p><input type="file" id="btnUploadimg" name="fileUpload" onchange=""></input></p>
+            </div> -->
+
 
         </div>
-        <!-- Set service -->
+        
 
     </div>
 
+    <!-- Set service -->
     <div class="container">
         <h3>Service <span class="float-right"><button type="button" class="btn btn-primary btn-md mb-4"
                     data-toggle="modal" data-target="#modalAddService">

@@ -12,6 +12,28 @@
     <link rel="stylesheet" href="styles/style.css">
     <!-- No need to put "Public" we are already in Public static server -->
 
+
+    <script>
+        $(document).ready(function () {
+            if (sessionStorage != undefined) {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/getname_by_userid",
+                    data: { user_id: sessionStorage.user_id },
+                    dataSrc: "",
+                    success: function (response) {
+                        const username = response[0].username
+                        $("#formbtnLogin").hide()
+                        $("#username").html("username")
+                    },
+                    error: function (xhr) {
+                        Swal.fire(xhr.responseText)
+                    }
+                });
+            }
+
+        });
+    </script>
 </head>
 
 <body>
@@ -31,11 +53,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/customer_appointment">My Appointment</a>
                 </li>
-                
+
             </ul>
 
         </div>
-        <form class="my-2 my-lg-sm">
+        <form class="my-2 my-lg-sm" id="formbtnLogin">
             <a href="/login">
                 <button class="btn btn-warning my-2 my-sm-0 btn-md" type="button">Login</button>
             </a>
@@ -43,6 +65,7 @@
                 <button type="button" class="btn btn-outline-warning btn-md pl-2">Register</button>
             </a>
         </form>
+        <div id="username" class="text-white"></div>
     </nav>
     <!--Carousel Info-->
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -364,7 +387,7 @@
             </div>
         </div>
 
-        
+
     </footer>
 </body>
 

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <!--Sweet alert-->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.6.1/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.6.1/sweetalert2.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
@@ -24,16 +24,26 @@
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
     <!--Sweet alert CDN-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.6.1/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/10.6.1/sweetalert2.min.js"></script>
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js'></script>
 
+    <style>
+        body {
+            background: linear-gradient(to right, #cffbff, #5b9dff);
+            min-height: 100vh
+        }
 
+        /* Fix text-color in card body */
+        .text-gray {
+            color: #aaa
+        }
+    </style>
 
 
     <script>
         var appointments;
-        
+
         $(document).ready(function () {
             if (sessionStorage.user_id == undefined || sessionStorage.user_id == "undefined") {
                 Swal.fire("Please login first!").then(function () {
@@ -58,7 +68,7 @@
                 headerToolbar: { center: 'dayGridMonth,dayGridWeek,timeGridDay' },
                 initialView: 'dayGridWeek',
                 selectable: true,
-                
+
                 nowIndicator: true,
                 events: appointments,
 
